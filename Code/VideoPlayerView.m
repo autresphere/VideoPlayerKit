@@ -71,6 +71,7 @@
         _volumeView = [[MPVolumeView alloc] init];
         [_volumeView setShowsRouteButton:YES];
         [_volumeView setShowsVolumeSlider:NO];
+        _volumeView.hidden = YES;
         [_playerControlBar addSubview:_volumeView];
         
         // Listen to alpha changes to know when other routes are available
