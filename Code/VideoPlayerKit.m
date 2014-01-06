@@ -2,7 +2,6 @@
 
 #import "VideoPlayerKit.h"
 #import "FullScreenViewController.h"
-#import "ShareThis.h"
 
 NSString * const kVideoPlayerVideoChangedNotification = @"VideoPlayerVideoChangedNotification";
 NSString * const kVideoPlayerWillHideControlsNotification = @"VideoPlayerWillHideControlsNotitication";
@@ -152,15 +151,6 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
     [self.view addGestureRecognizer:pinchRecognizer];
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
-{
-    if ([touch.view isDescendantOfView:self.videoPlayerView.playerControlBar] || [touch.view isDescendantOfView:self.videoPlayerView.shareButton]) {
-        return NO;
-    }
-    return YES;
-}
-
-
 - (void)viewWillAppear:(BOOL)animated
 {
     if (self.fullScreenModeToggled) {
@@ -174,7 +164,6 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
 - (void)presentShareOptions
 {
     showShareOptions = NO;
-    [ShareThis showShareOptionsToShareUrl:[_currentVideoInfo objectForKey:@"shareURL"] title:[_currentVideoInfo objectForKey:@"title"] image:nil onViewController:[[[UIApplication sharedApplication] keyWindow] rootViewController] forTypeOfContent:STContentTypeVideo];
 }
 
 - (void)shareButtonHandler
@@ -190,6 +179,10 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
 
 - (void)playVideoWithTitle:(NSString *)title URL:(NSURL *)url videoID:(NSString *)videoID shareURL:(NSURL *)shareURL isStreaming:(BOOL)streaming playInFullScreen:(BOOL)playInFullScreen
 {
+}
+
+- (void)playVideoWithTitle:(NSString *)title playerItem:(AVPlayerItem *)playerItem videoID:(NSString *)videoID shareURL:(NSURL *)shareURL isStreaming:(BOOL)streaming playInFullScreen:(BOOL)playInFullScreen
+{
     [self.videoPlayer pause];
     
     [[_videoPlayerView activityIndicator] startAnimating];
@@ -198,7 +191,7 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
     [self showControls];
     
     NSString *vidID = videoID ?: @"";
-    _currentVideoInfo = @{ @"title": title ?: @"", @"videoID": vidID, @"isStreaming": @(streaming), @"shareURL": shareURL ?: url};
+    _currentVideoInfo = @{ @"title": title ?: @"", @"videoID": vidID, @"isStreaming": @(streaming)};
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kVideoPlayerVideoChangedNotification
                                                         object:self
@@ -221,7 +214,7 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
                                      MPMediaItemPropertyTitle: title,
      }];
     
-    [self setURL:url];
+    [self setPlayerItem:playerItem];
     
     [self syncPlayPauseButtons];
     
@@ -328,6 +321,7 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
 
 - (void)minimizeVideo
 {
+    [_videoPlayer pause];
     if (self.fullScreenModeToggled) {
         self.fullScreenModeToggled = NO;
         [self.videoPlayerView setFullscreen:NO];
@@ -371,13 +365,12 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
         }
         
         
+        [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationFade];
         [[UIApplication sharedApplication].keyWindow.rootViewController dismissViewControllerAnimated:self.isAlwaysFullscreen completion:^{
 
             if (!self.isAlwaysFullscreen) {
                 [self showControls];
             }
-            [[UIApplication sharedApplication] setStatusBarHidden:NO
-                                                    withAnimation:UIStatusBarAnimationFade];
             
             if ([self.delegate respondsToSelector:@selector(setFullScreenToggled:)]) {
                 [self.delegate setFullScreenToggled:self.fullScreenModeToggled];
@@ -447,6 +440,11 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
 {
     AVPlayerItem *playerItem = [AVPlayerItem playerItemWithURL:url];
     
+    [self setPlayerItem:playerItem];
+}
+
+- (void)setPlayerItem:(AVPlayerItem *)playerItem
+{
     [playerItem addObserver:self
                  forKeyPath:@"status"
                     options:NSKeyValueObservingOptionNew
@@ -813,7 +811,6 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
         self.restoreVideoPlayStateAfterScrubbing = NO;
         scrubBuffering = YES;
     }
-    [[_videoPlayerView activityIndicator] startAnimating];
     
     [self showControls];
 }
