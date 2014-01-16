@@ -144,6 +144,8 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
     
     UITapGestureRecognizer *playerTouchedGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(videoTapHandler)];
     playerTouchedGesture.delegate = self;
+    // Workaround for iOS 5 to enable buttons.
+    playerTouchedGesture.cancelsTouchesInView = NO;
     [_videoPlayerView addGestureRecognizer:playerTouchedGesture];
     
     UIPinchGestureRecognizer *pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGesture:)];
@@ -185,7 +187,6 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
 {
     [self.videoPlayer pause];
     
-    [[_videoPlayerView activityIndicator] startAnimating];
     // Reset the buffer bar back to 0
     [self.videoPlayerView.progressView setProgress:0 animated:NO];
     [self showControls];
@@ -528,7 +529,6 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
         }
     } else if ([keyPath isEqualToString:@"playbackBufferEmpty"] && _videoPlayer.currentItem.playbackBufferEmpty) {
         self.playerIsBuffering = YES;
-        [[_videoPlayerView activityIndicator] startAnimating];
         [self syncPlayPauseButtons];
     } else if ([keyPath isEqualToString:@"playbackLikelyToKeepUp"] && _videoPlayer.currentItem.playbackLikelyToKeepUp) {
         if (![self isPlaying] && (playWhenReady || self.playerIsBuffering || scrubBuffering)) {
