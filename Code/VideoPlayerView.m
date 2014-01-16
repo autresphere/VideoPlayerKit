@@ -28,6 +28,11 @@
 
 @implementation VideoPlayerView
 
+- (BOOL)isOSVersionSmallerThan7
+{
+    return ([[UIDevice currentDevice].systemVersion compare:@"7" options:NSNumericSearch] == NSOrderedAscending);
+}
+
 - (id)initWithFrame:(CGRect)frame
 {
     if (self = [super initWithFrame:frame]) {
@@ -36,7 +41,6 @@
         [self addSubview:_airplayIsActiveView];
         
         _titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-        [_titleLabel setFont:[UIFont fontWithName:@"Forza-Medium" size:16.0f]];
         [_titleLabel setTextColor:[UIColor whiteColor]];
         [_titleLabel setBackgroundColor:[UIColor clearColor]];
         [_titleLabel setNumberOfLines:2];
@@ -52,8 +56,15 @@
         [_playPauseButton setShowsTouchWhenHighlighted:YES];
         [_playerControlBar addSubview:_playPauseButton];
         
-        _fullScreenButton = [[UIButton alloc] init];
-        [_fullScreenButton setImage:[UIImage imageNamed:@"fullscreen-button"] forState:UIControlStateNormal];
+        if([self isOSVersionSmallerThan7])
+        {
+            _fullScreenButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        }
+        else
+        {
+            _fullScreenButton = [UIButton buttonWithType:UIButtonTypeSystem];
+        }
+        [_fullScreenButton setTitle:@"OK" forState:UIControlStateNormal];
         [_fullScreenButton setShowsTouchWhenHighlighted:YES];
         [_playerControlBar addSubview:_fullScreenButton];
         
@@ -63,9 +74,6 @@
         [_playerControlBar addSubview:_progressView];
         
         _videoScrubber = [[UISlider alloc] init];
-        [_videoScrubber setMinimumTrackTintColor:[UIColor redColor]];
-        [_videoScrubber setMaximumTrackImage:[UIImage imageNamed:@"transparentBar"] forState:UIControlStateNormal];
-        [_videoScrubber setThumbTintColor:[UIColor whiteColor]];
         [_playerControlBar addSubview:_videoScrubber];
         
         _volumeView = [[MPVolumeView alloc] init];
@@ -87,14 +95,12 @@
         _currentPositionLabel = [[UILabel alloc] init];
         [_currentPositionLabel setBackgroundColor:[UIColor clearColor]];
         [_currentPositionLabel setTextColor:[UIColor whiteColor]];
-        [_currentPositionLabel setFont:[UIFont fontWithName:@"DINRoundCompPro" size:14.0f]];
         [_currentPositionLabel setTextAlignment:NSTextAlignmentCenter];
         [_playerControlBar addSubview:_currentPositionLabel];
         
         _timeLeftLabel = [[UILabel alloc] init];
         [_timeLeftLabel setBackgroundColor:[UIColor clearColor]];
         [_timeLeftLabel setTextColor:[UIColor whiteColor]];
-        [_timeLeftLabel setFont:[UIFont fontWithName:@"DINRoundCompPro" size:14.0f]];
         [_timeLeftLabel setTextAlignment:NSTextAlignmentCenter];
         [_playerControlBar addSubview:_timeLeftLabel];
         
@@ -198,12 +204,12 @@
     }
     
     [_currentPositionLabel setFrame:CGRectMake(PLAYER_CONTROL_BAR_HEIGHT,
-                                               ALIGNMENT_FUZZ,
+                                               ALIGNMENT_FUZZ - 3,
                                                CURRENT_POSITION_WIDTH,
                                                PLAYER_CONTROL_BAR_HEIGHT)];
     [_timeLeftLabel setFrame:CGRectMake(bounds.size.width - PLAYER_CONTROL_BAR_HEIGHT - TIME_LEFT_WIDTH
                                         - routeButtonRect.size.width,
-                                        ALIGNMENT_FUZZ,
+                                        ALIGNMENT_FUZZ - 3,
                                         TIME_LEFT_WIDTH,
                                         PLAYER_CONTROL_BAR_HEIGHT)];
     

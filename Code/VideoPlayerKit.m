@@ -765,11 +765,11 @@ NSString * const kTrackEventVideoComplete = @"Video Complete";
 
 - (void)syncFullScreenButton:(UIInterfaceOrientation)toInterfaceOrientation
 {
-    if (_fullScreenModeToggled) {
-        [_videoPlayerView.fullScreenButton setImage:[UIImage imageNamed:@"minimize-button"] forState:UIControlStateNormal];
-    } else {
-        [_videoPlayerView.fullScreenButton setImage:[UIImage imageNamed:@"fullscreen-button"] forState:UIControlStateNormal];
-    }
+//    if (_fullScreenModeToggled) {
+//        [_videoPlayerView.fullScreenButton setImage:[UIImage imageNamed:@"minimize-button"] forState:UIControlStateNormal];
+//    } else {
+//        [_videoPlayerView.fullScreenButton setImage:[UIImage imageNamed:@"fullscreen-button"] forState:UIControlStateNormal];
+//    }
 }
 
 -(void)scrubbingDidBegin
